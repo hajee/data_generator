@@ -1,0 +1,2 @@
+defmodule DataGenerator do
+end

@@ -18,7 +18,6 @@ import MultiDef
     String.split(definition_string)
   end
 
-
   @doc """
 
   Transform a list of string tokens into a list of structs

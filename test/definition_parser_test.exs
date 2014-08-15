@@ -1,4 +1,4 @@
-defmodule DataGeneratorTest do
+defmodule DefinitionParserTest do
   use ExUnit.Case
 
   import DefinitionParser

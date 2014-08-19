@@ -15,7 +15,7 @@ import MultiDef
 
   """
   def tokenize(definition_string) do
-    String.split(definition_string)
+    {:ok, String.split(definition_string)}
   end
 
   @doc """
@@ -24,7 +24,7 @@ import MultiDef
 
   """
   def entitize(tokens) do
-    _entitize(tokens, [])
+    {:ok, _entitize(tokens, [])}
   end
 
   mdef _entitize do
@@ -40,7 +40,8 @@ import MultiDef
   end
 
   mdef _parse do
-    [], result                          -> Enum.reverse(result)
+    [], result                          -> {:ok, Enum.reverse(result)}
+    [%Entity{}, %Entity{}| _], _        -> {:error, "entity definition must close with an end"}
     [%Entity{} = entity| rest], result  -> _parse(rest, [entity| result])
 
     [%Attribute{} = attribute| rest], [%Entity{} = entity| result_tail]

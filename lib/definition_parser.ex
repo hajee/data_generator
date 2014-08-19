@@ -1,10 +1,8 @@
 defmodule DefinitionParser do
 
-import MultiDef
-
 # def definitions(content) do
 #    tokenize(content)    # put into a list of tokens
-#     |> entitize         # put tokens into list f entities        
+#     |> parse         # put tokens into list f entities        
 #
 #
 #
@@ -23,33 +21,23 @@ import MultiDef
   Transform a list of string tokens into a list of structs
 
   """
-  def entitize(tokens) do
-    {:ok, _entitize(tokens, [])}
+  def parse(tokens) do
+    _parse(tokens, [])
   end
 
-  mdef _entitize do
-    [], result                          -> Enum.reverse(result)
-    ["entity", name | rest], result     -> _entitize(rest, [ %Entity{name: name} | result])
-    ["end" |rest], result               -> _entitize(rest, [ "end"| result])
-    [name, definition | rest], result   -> _entitize(rest, [ %Attribute{name: name, definition: definition} | result])
+  defp _parse([], result),                                      do: {:ok, Enum.reverse(result)}
+  defp _parse(["entity", name | rest], result),                 do: _parse([%Entity{name: name}| rest], result)
+  defp _parse([%Entity{} = entity, "end"| rest], result),       do: _parse( rest, [entity| result])
+  defp _parse([%Entity{name: name}, "entity"| rest], result),   do: {:error, "entity definition must close with an end"}
+
+  defp _parse([%Entity{} = entity, name, definition | rest], result) do
+    entity = _add_attribute_to_entity(entity, name, definition)
+    _parse( [entity| rest], result)
   end
 
 
-  def parse( list) do
-    _parse( list, [])
-  end
-
-  mdef _parse do
-    [], result                          -> {:ok, Enum.reverse(result)}
-    [%Entity{}, %Entity{}| _], _        -> {:error, "entity definition must close with an end"}
-    [%Entity{} = entity| rest], result  -> _parse(rest, [entity| result])
-
-    [%Attribute{} = attribute| rest], [%Entity{} = entity| result_tail]
-                                        -> _parse(rest, [_add_attribute_to_entity(entity, attribute) | result_tail])
-    ["end"| rest], result               -> _parse(rest, result )
-  end
-
-  defp _add_attribute_to_entity(entity, attribute) do
+  defp _add_attribute_to_entity(entity, name, definition) do
+    attribute = %Attribute{name: name, definition: definition}
     new_attributes = Enum.sort([attribute | entity.attributes])
     %{entity | attributes: new_attributes}
   end
